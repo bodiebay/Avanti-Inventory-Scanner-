@@ -1,0 +1,81 @@
+import 'package:flutter/material.dart';
+import 'package:inventory_scanner/login_screen.dart';
+import 'package:inventory_scanner/auth_service.dart';
+import 'package:inventory_scanner/home_screen.dart'; // Add this import for HomeScreen
+
+void main() async {
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    final authService = AuthService();
+    await authService.signOut(); // Keeping this for now to maintain current behavior
+    runApp(const MyApp());
+  }, (error, stackTrace) {
+    print('Uncaught error: $error');
+    print('Stack trace: $stackTrace');
+  });
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Inventory Scanner', // Added app title
+      debugShowCheckedModeBanner: false, // Disable debug banner for production
+      theme: ThemeData(
+        primaryColor: Colors.green.shade200,
+        scaffoldBackgroundColor: Colors.green.shade50,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color.fromRGBO(144, 238, 144, 1),
+          foregroundColor: Colors.white,
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color.fromRGBO(0, 100, 0, 1)),
+          bodyMedium: TextStyle(color: Color.fromRGBO(0, 100, 0, 1)),
+        ),
+        buttonTheme: const ButtonThemeData(
+          buttonColor: Color.fromRGBO(152, 251, 152, 1),
+          textTheme: ButtonTextTheme.primary,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color.fromRGBO(152, 251, 152, 1),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+          filled: true,
+          fillColor: Color.fromRGBO(240, 255, 240, 1),
+          labelStyle: TextStyle(color: Color.fromRGBO(0, 100, 0, 1)),
+        ),
+        cardTheme: CardTheme(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          color: const Color.fromRGBO(240, 255, 240, 1),
+        ),
+      ),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(), // Added route for post-login
+      },
+      onUnknownRoute: (settings) { // Added handler for undefined routes
+        return MaterialPageRoute(
+          builder: (context) => Scaffold(
+            appBar: AppBar(title: const Text('Error')),
+            body: const Center(child: Text('Page not found')),
+          ),
+        );
+      },
+    );
+  }
+}

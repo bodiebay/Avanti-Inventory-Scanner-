@@ -1,0 +1,48 @@
+name: inventory_scanner_new
+description: A Flutter inventory scanner application.
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.5
+  uuid: ^3.0.7  # For generating unique IDs
+  
+  # Core functionality packages
+  flutter_secure_storage: ^8.0.0  # For secure token storage
+  mobile_scanner: ^3.4.1  # For barcode scanning
+  # connectivity_plus: ^4.0.2  # Keeping commented out due to previous errors
+  
+  # Additional required packages for full functionality
+  http: ^1.1.0  # For API requests
+  flutter_web_auth: ^0.5.0  # For OAuth authentication
+  provider: ^6.0.5  # For state management
+  intl: ^0.18.1  # For date/time formatting and localization
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.2
+
+flutter:
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  # assets:
+  #   - images/logo.png
+  
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic

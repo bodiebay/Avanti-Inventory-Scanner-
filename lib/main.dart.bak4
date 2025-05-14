@@ -1,0 +1,102 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_appauth/flutter_appauth.dart';
+import 'package:http/http.dart' as http;
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Inventory Scanner',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final FlutterAppAuth _appAuth = FlutterAppAuth();
+  String? _accessToken;
+  String? _error;
+
+  Future<void> _fetchAccessToken() async {
+    try {
+      final AuthorizationTokenResponse? result = await _appAuth.authorizeAndExchangeCode(
+        AuthorizationTokenRequest(
+          '3c82ea21-fb37-4e3d-bbe2-bd4dc7237185',
+          'com.aaronwalker.inventoryscanner://oauth2redirect',
+          issuer: 'https://login.microsoftonline.com/873ebc3c-13b9-43e6-865c-1e26b0185b40/v2.0',
+          scopes: ['Files.ReadWrite.All', 'Sites.FullControl.All', 'User.Read', 'openid', 'profile'],
+        ),
+      );
+      if (result?.accessToken != null) {
+        setState(() {
+          _accessToken = result!.accessToken!;
+          _error = null;
+        });
+        await testSharePointFetch(result!.accessToken!);
+      } else {
+        setState(() {
+          _error = 'Login failed: No access token';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Error: $e';
+      });
+    }
+  }
+
+  Future<void> testSharePointFetch(String token) async {
+    try {
+      final String testBarcode = "MMFK3LL";
+      final response = await http.get(
+        Uri.parse('https://avantiwindow.sharepoint.com/sites/Inventory/_api/web/lists/getbytitle(\'Inventory\')/items?$filter=Barcode eq \'$testBarcode\''),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      print('SharePoint Data: ${response.body}');
+      setState(() {
+        _error = response.statusCode == 200 ? 'Data fetched successfully' : 'Fetch failed: ${response.statusCode}';
+      });
+    } catch (e) {
+      print('SharePoint Error: $e');
+      setState(() {
+        _error = 'SharePoint Error: $e';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Inventory Scanner')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_accessToken != null)
+              const Text('Logged in successfully!'),
+            if (_error != null)
+              Text('Error: $_error', style: const TextStyle(color: Colors.red)),
+            ElevatedButton(
+              onPressed: _fetchAccessToken,
+              child: const Text('Login'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
